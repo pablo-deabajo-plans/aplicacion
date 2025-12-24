@@ -6,6 +6,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const entrenamientosRoutes = require('./routes/entrenamientos');
+const rutinaRoutes = require('./routes/rutina');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 app.use('/api/entrenamientos', entrenamientosRoutes);
+app.use('/api/rutina-semanal', rutinaRoutes);
 
 // Ruta raíz (index)
 app.get('/', (req, res) => {

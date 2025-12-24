@@ -118,6 +118,7 @@
 
             // Inicializar tabla semanal
             inicializarRutinaSemanal();
+	    cargarRutinaSemanal(); 
             cargarEntrenamientos();
         });
 
@@ -221,33 +222,68 @@
             }
         });
 
-        // Guardar rutina semanal
-        function guardarRutinaSemanal() {
-            const token = localStorage.getItem('token');
-            const rutina = {};
+// Guardar rutina semanal
+function guardarRutinaSemanal() {
+    const token = localStorage.getItem('token');
+    const rutina = {};
 
-            document.querySelectorAll('.rutina-input').forEach(input => {
-                rutina[input.dataset.dia] = input.value;
-            });
+    document.querySelectorAll('.rutina-input').forEach(input => {
+        rutina[input.dataset.dia] = input.value;
+    });
 
-            fetch('/api/rutina-semanal', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(rutina)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarMensaje('✓ Rutina semanal guardada', 'success');
-                } else {
-                    mostrarMensaje('✗ Error al guardar', 'error');
-                }
-            })
-            .catch(() => mostrarMensaje('✗ Error de conexión', 'error'));
+    fetch('/api/rutina-semanal', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(rutina)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            mostrarMensaje('✓ Rutina semanal guardada', 'success');
+        } else {
+            mostrarMensaje('✗ Error al guardar', 'error');
         }
+    })
+    .catch(() => mostrarMensaje('✗ Error de conexión', 'error'));
+}
+
+// Cargar rutina semanal desde la API y rellenar inputs
+function cargarRutinaSemanal() {
+    const token = localStorage.getItem('token');
+
+    fetch('/api/rutina-semanal', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.rutina) return; // No hay rutina guardada todavía
+
+        const r = data.rutina;
+        const mapa = {
+            'Lunes': r.lunes,
+            'Martes': r.martes,
+            'Miércoles': r.miercoles,
+            'Jueves': r.jueves,
+            'Viernes': r.viernes,
+            'Sábado': r.sabado,
+            'Domingo': r.domingo
+        };
+
+        document.querySelectorAll('.rutina-input').forEach(input => {
+            const dia = input.dataset.dia;
+            if (mapa[dia] !== undefined && mapa[dia] !== null) {
+                input.value = mapa[dia];
+            }
+        });
+    })
+    .catch(err => console.error('Error cargando rutina semanal:', err));
+}
+
 
         // Cargar entrenamientos
         function cargarEntrenamientos() {
