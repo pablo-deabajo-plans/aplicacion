@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitness App</title>
+    <link rel="stylesheet" href="estilos/deporte.css">
+</head>
+<body>
+    <header>
+        <h1>🏋️ Entrenamientos</h1>
+        <div class="header-actions">
+            <a href="/dashboard.html">← Volver al Dashboard</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <!-- Sidebar: Formulario para crear entrenamiento -->
+            <aside class="sidebar">
+                <h3>Crear Nuevo Entrenamiento</h3>
+                <div id="message" class="message"></div>
+                <form id="entrenamientoForm">
+                    <div class="form-group">
+                        <label for="nombre_entrenamiento">Nombre del Entrenamiento:</label>
+                        <input type="text" id="nombre_entrenamiento" name="nombre_entrenamiento" placeholder="Ej: Pecho pesado" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dia_entrenamiento">Día:</label>
+                        <select id="dia_entrenamiento" name="dia_entrenamiento" required>
+                            <option value="">-- Selecciona un día --</option>
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                            <option value="Sábado">Sábado</option>
+                            <option value="Domingo">Domingo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea id="descripcion" name="descripcion" placeholder="Describe tu entrenamiento..."></textarea>
+                    </div>
+
+                    <h3 style="margin-top: 20px;">Ejercicios</h3>
+                    <div id="ejercicios-container">
+                        <div class="ejercicio-grupo">
+                            <div class="form-group">
+                                <label for="ejercicio_nombre_0">Nombre del ejercicio:</label>
+                                <input type="text" class="ejercicio_nombre" placeholder="Ej: Press Banca">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ejercicio_series_0">Series:</label>
+                                <input type="number" class="ejercicio_series" min="1" value="4">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Repeticiones (por serie, ej: 8-8-6-6):</label>
+                                <input type="text" class="ejercicio_reps" placeholder="8-8-6-6">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Peso (kg, por serie, ej: 80-80-85-85):</label>
+                                <input type="text" class="ejercicio_peso" placeholder="80-80-85-85">
+                            </div>
+
+                            <button type="button" class="btn-remove-exercise" onclick="removeExercise(this)">Eliminar Ejercicio</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-add" onclick="agregarEjercicio()" style="background-color: #28a745; margin-bottom: 15px;">+ Añadir Ejercicio</button>
+
+                    <button type="submit">Guardar Entrenamiento</button>
+                </form>
+            </aside>
+
+            <!-- Main content: Rutina semanal y entrenamientos guardados -->
+            <main class="main-content">
+                <section class="rutina-semanal">
+                    <h2>📅 Mi Rutina Semanal</h2>
+                    <p>Registra qué vas a entrenar cada día:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Día</th>
+                                <th>Mi Rutina</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-rutina">
+                            <!-- Se llena con JavaScript -->
+                        </tbody>
+                    </table>
+                    <button type="button" onclick="guardarRutinaSemanal()" style="background-color: #28a745;">Guardar Rutina Semanal</button>
+                </section>
+
+                <section class="entrenamientos-list">
+                    <h2>🏋️ Mis Entrenamientos Guardados</h2>
+                    <div id="lista-entrenamientos">
+                        <p style="color: #999;">Cargando entrenamientos...</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Verificar autenticación
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Inicializar tabla semanal
+            inicializarRutinaSemanal();
+            cargarEntrenamientos();
+        });
+
+        // Inicializar tabla de rutina semanal
+        function inicializarRutinaSemanal() {
+            const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const tabla = document.getElementById('tabla-rutina');
+            tabla.innerHTML = '';
+
+            dias.forEach(dia => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${dia}</strong></td>
+                    <td><input type="text" class="rutina-input" data-dia="${dia}" placeholder="Ej: Pecho y tríceps"></td>
+                `;
+                tabla.appendChild(row);
+            });
+        }
+
+        // Agregar nuevo ejercicio
+        function agregarEjercicio() {
+            const contenedor = document.getElementById('ejercicios-container');
+            const plantilla = contenedor.querySelector('.ejercicio-grupo').cloneNode(true);
+            
+            // Limpiar inputs
+            plantilla.querySelectorAll('input').forEach(input => input.value = '');
+            
+            // Cambiar botón de eliminar
+            const btnRemove = plantilla.querySelector('.btn-remove-exercise');
+            if (btnRemove) {
+                btnRemove.onclick = function() { removeExercise(this); };
+            }
+            
+            contenedor.appendChild(plantilla);
+        }
+
+        // Eliminar ejercicio
+        function removeExercise(btn) {
+            const ejercicios = document.querySelectorAll('.ejercicio-grupo');
+            if (ejercicios.length > 1) {
+                btn.closest('.ejercicio-grupo').remove();
+            } else {
+                alert('Debe haber al menos un ejercicio');
+            }
+        }
+
+        // Guardar entrenamiento
+        document.getElementById('entrenamientoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const token = localStorage.getItem('token');
+            const nombre_entrenamiento = document.getElementById('nombre_entrenamiento').value;
+            const dia_entrenamiento = document.getElementById('dia_entrenamiento').value;
+            const descripcion = document.getElementById('descripcion').value;
+
+            const ejercicios = [];
+            document.querySelectorAll('.ejercicio-grupo').forEach(grupo => {
+                const nombre = grupo.querySelector('.ejercicio_nombre').value;
+                const series = grupo.querySelector('.ejercicio_series').value;
+                const reps = grupo.querySelector('.ejercicio_reps').value;
+                const peso = grupo.querySelector('.ejercicio_peso').value;
+
+                if (nombre) {
+                    ejercicios.push({ nombre, series, reps, peso });
+                }
+            });
+
+            if (ejercicios.length === 0) {
+                mostrarMensaje('Por favor, añade al menos un ejercicio', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/entrenamientos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        nombre_entrenamiento,
+                        dia_entrenamiento,
+                        descripcion,
+                        ejercicios
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    mostrarMensaje('✓ Entrenamiento guardado correctamente', 'success');
+                    document.getElementById('entrenamientoForm').reset();
+                    document.getElementById('dia_entrenamiento').value = '';
+                    cargarEntrenamientos();
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error al guardar'), 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+        });
+
+        // Guardar rutina semanal
+        function guardarRutinaSemanal() {
+            const token = localStorage.getItem('token');
+            const rutina = {};
+
+            document.querySelectorAll('.rutina-input').forEach(input => {
+                rutina[input.dataset.dia] = input.value;
+            });
+
+            fetch('/api/rutina-semanal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(rutina)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('✓ Rutina semanal guardada', 'success');
+                } else {
+                    mostrarMensaje('✗ Error al guardar', 'error');
+                }
+            })
+            .catch(() => mostrarMensaje('✗ Error de conexión', 'error'));
+        }
+
+        // Cargar entrenamientos
+        function cargarEntrenamientos() {
+            const token = localStorage.getItem('token');
+
+            fetch('/api/entrenamientos', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const contenedor = document.getElementById('lista-entrenamientos');
+                
+                if (data.entrenamientos && data.entrenamientos.length > 0) {
+                    contenedor.innerHTML = '';
+                    data.entrenamientos.forEach(entrenamiento => {
+                        const ejerciciosHTML = entrenamiento.ejercicios.map(e => `
+                            <div class="serie">
+                                <strong>${e.nombre}</strong> - ${e.series} series de ${e.reps} reps @ ${e.peso} kg
+                            </div>
+                        `).join('');
+
+                        const item = document.createElement('div');
+                        item.className = 'entrenamiento-item';
+                        item.innerHTML = `
+                            <h4>${entrenamiento.nombre_entrenamiento}</h4>
+                            <p><strong>Día:</strong> ${entrenamiento.dia_entrenamiento}</p>
+                            ${entrenamiento.descripcion ? `<p><strong>Descripción:</strong> ${entrenamiento.descripcion}</p>` : ''}
+                            <h5>Ejercicios:</h5>
+                            ${ejerciciosHTML}
+                            <button class="btn-delete" onclick="eliminarEntrenamiento(${entrenamiento.id})">Eliminar</button>
+                        `;
+                        contenedor.appendChild(item);
+                    });
+                } else {
+                    contenedor.innerHTML = '<p style="color: #999;">Aún no has creado ningún entrenamiento</p>';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        // Eliminar entrenamiento
+        function eliminarEntrenamiento(id) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este entrenamiento?')) return;
+
+            const token = localStorage.getItem('token');
+
+            fetch(`/api/entrenamientos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('✓ Entrenamiento eliminado', 'success');
+                    cargarEntrenamientos();
+                } else {
+                    mostrarMensaje('✗ Error al eliminar', 'error');
+                }
+            })
+            .catch(() => mostrarMensaje('✗ Error de conexión', 'error'));
+        }
+
+        // Mostrar mensaje
+        function mostrarMensaje(texto, tipo) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = texto;
+            messageDiv.className = 'message ' + tipo;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

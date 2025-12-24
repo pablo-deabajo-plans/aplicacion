@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Fitness App</title>
+    <link rel="stylesheet" href="./dashboard.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>💪 Dashboard - Fitness App</h1>
+            <p>Gestiona tus rutinas, deportes y objetivos</p>
+        </div>
+        <div class="header-actions">
+            <div class="user-info">
+                <p id="user-name"></p>
+                <p id="user-email" style="font-size: 12px;"></p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <main>
+        <div class="servicios-grid">
+            <!-- Servicio: Rutinas/Entrenamientos -->
+            <div class="servicio-card">
+                <div class="icon">🏋️</div>
+                <h2>Entrenamientos</h2>
+                <p>Crea y gestiona tus rutinas de entrenamiento diarias. Registra ejercicios, series y repeticiones.</p>
+                <a href="/servicios/deporte.html">Ir a Entrenamientos</a>
+            </div>
+
+            <!-- Servicio: Nutrición -->
+            <div class="servicio-card">
+                <div class="icon">🥗</div>
+                <h2>Nutrición</h2>
+                <p>Controla tu alimentación y registra las calorías consumidas cada día.</p>
+                <a href="/servicios/nutricion.html">Ir a Nutrición</a>
+            </div>
+            <!-- Servicio: Objetivos -->
+            <div class="servicio-card">
+                <div class="icon">🎯</div>
+                <h2>Objetivos</h2>
+                <p>Establece tus metas de fitness y sigue tu progreso a lo largo del tiempo.</p>
+                <a href="/servicios/objetivos.html">Ir a Objetivos</a>
+            </div>
+
+            <!-- Servicio: Estadísticas -->
+            <div class="servicio-card">
+                <div class="icon">📊</div>
+                <h2>Estadísticas</h2>
+                <p>Visualiza gráficos y datos sobre tu desempeño deportivo y progreso.</p>
+                <a href="/servicios/estadisticas.html">Ir a Estadísticas</a>
+            </div>
+
+            <!-- Servicio: Perfil -->
+            <div class="servicio-card">
+                <div class="icon">👤</div>
+                <h2>Mi Perfil</h2>
+                <p>Actualiza tu información personal y preferencias de la aplicación.</p>
+                <a href="/servicios/perfil.html">Ir a Mi Perfil</a>
+            </div>
+
+            <!-- Servicio: Configuración -->
+            <div class="servicio-card">
+                <div class="icon">⚙️</div>
+                <h2>Configuración</h2>
+                <p>Ajusta las preferencias y opciones de seguridad de tu cuenta.</p>
+                <a href="/servicios/configuracion.html">Ir a Configuración</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Fitness App. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (!token || !user) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const userData = JSON.parse(user);
+            document.getElementById('user-name').textContent = userData.nombre_usuario;
+            document.getElementById('user-email').textContent = userData.email;
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+/* deporte.css - Estilos para página de Entrenamientos */
+:root {
+    --primary-bg: #1a1a1a;
+    --secondary-bg: #2a2a2a;
+    --tertiary-bg: #3a3a3a;
+    --accent: #ff6b35;
+    --accent-hover: #ff8c5a;
+    --success: #4ade80;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-tertiary: #b0b0b0;
+    --border-radius: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+    --shadow-lg: 0 16px 48px rgba(0,0,0,0.4);
+    --input-bg: rgba(255,255,255,0.08);
+    --input-border: rgba(255,107,53,0.3);
+    --card-bg: rgba(42, 42, 42, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+    color: var(--text-primary);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* HEADER */
+header {
+    background: linear-gradient(180deg, rgba(42,42,42,0.95) 0%, rgba(26,26,26,0.95) 100%);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-bottom: 1px solid var(--input-border);
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+header h1 {
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-actions a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.9rem 1.8rem;
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.header-actions a:hover {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-2px);
+}
+
+/* CONTAINER */
+.container {
+    flex: 1;
+    padding: 2rem;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+}
+
+/* SIDEBAR - FORMULARIO */
+.sidebar {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 2rem;
+    box-shadow: var(--shadow);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.sidebar h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+    width: 100%;
+    padding: 1rem;
+    background: var(--input-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: Arial, sans-serif;
+    transition: all 0.3s ease;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+    background: rgba(255,255,255,0.12);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+/* Ejercicios Grupo */
+.ejercicio-grupo {
+    background: rgba(255,255,255,0.04);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255,107,53,0.2);
+}
+
+.ejercicio-grupo .form-group:last-child {
+    margin-bottom: 1rem;
+}
+
+/* Botones */
+button {
+    width: 100%;
+    padding: 1.1rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    margin-bottom: 1rem;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255,107,53,0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.btn-add {
+    background: linear-gradient(135deg, var(--success), #5edc71) !important;
+}
+
+.btn-add:hover {
+    box-shadow: 0 12px 40px rgba(74,222,128,0.4) !important;
+}
+
+.btn-remove-exercise {
+    width: 100% !important;
+    padding: 0.8rem !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+    box-shadow: none !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
+.btn-remove-exercise:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Mensaje */
+.message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+    animation: slideDown 0.3s ease;
+}
+
+.message.success {
+    background: rgba(74, 222, 128, 0.2);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.message.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* MAIN CONTENT */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+/* Sección Rutina Semanal */
+.rutina-semanal {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 2rem;
+    box-shadow: var(--shadow);
+}
+
+.rutina-semanal h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.rutina-semanal > p {
+    color: var(--text-tertiary);
+    margin-bottom: 1.5rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+table th {
+    background: rgba(255,107,53,0.15);
+    color: var(--text-primary);
+    padding: 1.25rem;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid var(--input-border);
+}
+
+table td {
+    padding: 1.25rem;
+    border: 1px solid var(--input-border);
+    background: rgba(255,255,255,0.02);
+}
+
+table input {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+}
+
+table input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.1);
+}
+
+.rutina-semanal button {
+    background: linear-gradient(135deg, var(--success), #5edc71);
+    width: auto;
+    padding: 1rem 2rem;
+}
+
+.rutina-semanal button:hover {
+    box-shadow: 0 12px 40px rgba(74,222,128,0.4);
+}
+
+/* Sección Entrenamientos */
+.entrenamientos-list {
+    background: var(--card-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 2rem;
+    box-shadow: var(--shadow);
+}
+
+.entrenamientos-list h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+#lista-entrenamientos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.entrenamiento-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.entrenamiento-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(255,107,53,0.15);
+    background: rgba(255,255,255,0.06);
+}
+
+.entrenamiento-item h4 {
+    font-size: 1.3rem;
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+}
+
+.entrenamiento-item p {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.entrenamiento-item h5 {
+    font-size: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.serie {
+    background: rgba(255,107,53,0.1);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid var(--accent);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.serie strong {
+    color: var(--accent);
+}
+
+.btn-delete {
+    width: 100% !important;
+    padding: 0.9rem !important;
+    background: rgba(239, 68, 68, 0.15) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #ef4444 !important;
+    box-shadow: none !important;
+    margin-top: 1.25rem !important;
+    margin-bottom: 0 !important;
+}
+
+.btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem 1rem;
+    }
+    
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .sidebar,
+    .rutina-semanal,
+    .entrenamientos-list {
+        padding: 2rem 1.5rem;
+    }
+    
+    #lista-entrenamientos {
+        grid-template-columns: 1fr;
+    }
+    
+    table {
+        font-size: 0.9rem;
+    }
+    
+    table th,
+    table td {
+        padding: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 1.5rem 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+    
+    .sidebar,
+    .rutina-semanal,
+    .entrenamientos-list {
+        padding: 1.5rem 1rem;
+    }
+    
+    .sidebar h3,
+    .rutina-semanal h2,
+    .entrenamientos-list h2 {
+        font-size: 1.4rem;
+    }
+    
+    input, select, textarea, button {
+        font-size: 16px; /* Evita zoom en móvil */
+    }
+    
+    .ejercicio-grupo {
+        padding: 1rem;
+    }
+    
+    table {
+        font-size: 0.85rem;
+    }
+    
+    table th,
+    table td {
+        padding: 0.75rem;
+    }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--primary-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
+

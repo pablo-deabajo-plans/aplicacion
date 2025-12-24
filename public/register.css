@@ -1,0 +1,169 @@
+/* register.css - Estilos para página de Registro Fitness App */
+:root {
+    --primary-bg: #1a1a1a;
+    --secondary-bg: #2a2a2a;
+    --accent: #ff6b35;
+    --accent-hover: #ff8c5a;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --success: #4ade80;
+    --error: #ef4444;
+    --border-radius: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.3);
+    --input-bg: rgba(255,255,255,0.08);
+    --input-border: rgba(255,107,53,0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+div {
+    background: rgba(42, 42, 42, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 3rem 2.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 450px;
+    width: 100%;
+    border: 1px solid var(--input-border);
+}
+
+h2 {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+form > div {
+    margin-bottom: 1.75rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+input {
+    width: 100%;
+    padding: 1.25rem;
+    background: var(--input-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+    background: rgba(255,255,255,0.12);
+}
+
+input::placeholder {
+    color: rgba(255,255,255,0.5);
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    color: var(--text-primary);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(255,107,53,0.4);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+.message {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+    display: none;
+}
+
+.message.success {
+    background: rgba(74, 222, 128, 0.2);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.message.error {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid var(--error);
+    color: var(--error);
+}
+
+div:last-child {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+div:last-child a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+div:last-child a:hover {
+    color: var(--accent-hover);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    div {
+        padding: 2.5rem 2rem;
+        margin: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.9rem;
+    }
+    
+    input, button[type="submit"] {
+        padding: 1.1rem;
+    }
+}
+
+/* Fix para el form ID en JS */
+form {
+    display: block;
+}
