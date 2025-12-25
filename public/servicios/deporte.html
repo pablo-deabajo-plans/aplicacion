@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h1>🏋️ Entrenamientos</h1>
+        <h1>️Entrenamientos</h1>
         <div class="header-actions">
             <a href="/dashboard.html">← Volver al Dashboard</a>
         </div>
@@ -16,7 +16,7 @@
 
     <div class="container">
         <div class="content">
-            <!-- Sidebar: Formulario para crear entrenamiento -->
+            
             <aside class="sidebar">
                 <h3>Crear Nuevo Entrenamiento</h3>
                 <div id="message" class="message"></div>
@@ -26,19 +26,22 @@
                         <input type="text" id="nombre_entrenamiento" name="nombre_entrenamiento" placeholder="Ej: Pecho pesado" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="dia_entrenamiento">Día:</label>
-                        <select id="dia_entrenamiento" name="dia_entrenamiento" required>
-                            <option value="">-- Selecciona un día --</option>
-                            <option value="Lunes">Lunes</option>
-                            <option value="Martes">Martes</option>
-                            <option value="Miércoles">Miércoles</option>
-                            <option value="Jueves">Jueves</option>
-                            <option value="Viernes">Viernes</option>
-                            <option value="Sábado">Sábado</option>
-                            <option value="Domingo">Domingo</option>
-                        </select>
-                    </div>
+		<div class="form-group">
+    		<label for="dia_entrenamiento">Día:</label>
+		    <div class="custom-select">
+		        <select id="dia_entrenamiento" name="dia_entrenamiento" required>
+		            <option value="">-- Selecciona un día --</option>
+		            <option value="Lunes">Lunes</option>
+		            <option value="Martes">Martes</option>
+		            <option value="Miércoles">Miércoles</option>
+		            <option value="Jueves">Jueves</option>
+		            <option value="Viernes">Viernes</option>
+		            <option value="Sábado">Sábado</option>
+		            <option value="Domingo">Domingo</option>
+		        </select>
+		    </div>
+		</div>
+
 
                     <div class="form-group">
                         <label for="descripcion">Descripción:</label>

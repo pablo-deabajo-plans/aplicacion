@@ -524,3 +524,73 @@ table input:focus {
     background: var(--accent-hover);
 }
 
+/* CUSTOM SELECT - Reutilizable */
+.custom-select {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.custom-select select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: var(--input-bg);
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    padding: 1rem 2.5rem 1rem 1rem;
+    width: 100%;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.custom-select select:hover {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.12);
+}
+
+.custom-select select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(255,107,53,0.1);
+    background: rgba(255,255,255,0.12);
+}
+
+.custom-select::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid var(--accent);
+    pointer-events: none;
+    transition: transform 0.3s ease;
+}
+
+.custom-select select:focus::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* Opciones visibles en el dropdown */
+.custom-select select option {
+    background-color: #303030;
+    color: #ffffff;
+    padding: 0.75rem;
+}
+
+.custom-select select option:checked {
+    background: linear-gradient(var(--accent), var(--accent));
+    background-color: var(--accent) !important;
+    color: #ffffff !important;
+}
+
+.custom-select select option:hover {
+    background-color: #404040;
+}

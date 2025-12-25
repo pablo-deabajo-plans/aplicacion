@@ -3,11 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrición - Fitness App</title>
+    <title>Fitness App</title>
+    <link rel="stylesheet" href="estilos/nutricion.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>🥗 Nutrición</h1>
-    <p>Proximamente...</p>
-    <a href="/dashboard.html">← Volver al Dashboard</a>
+    <header>
+        <h1> Nutrición</h1>
+        <div class="header-actions">
+            <a href="/dashboard.html">← Volver al Dashboard</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Gráfica -->
+        <section class="grafica-section">
+            <h2> Últimos 7 días</h2>
+            <canvas id="grafica-nutricion"></canvas>
+        </section>
+
+        <div class="content">
+            <!-- Sidebar: Agregar comida -->
+            <aside class="sidebar">
+                <h3>Agregar Comida</h3>
+                <div class="date-picker">
+                    <label for="fecha-selector">Fecha:</label>
+                    <input type="date" id="fecha-selector">
+                </div>
+
+                <form id="formComida">
+                    <div class="form-group">
+                        <label for="tipo-comida">Tipo de Comida:</label>
+    			    <div class="custom-select">
+        		    <select id="tipo-comida" required>
+            	   	       <option value="">-- Selecciona --</option>
+            		       <option value="Desayuno"> Desayuno</option>
+            		       <option value="Almuerzo">️Almuerzo</option>
+		               <option value="Cena"> Cena</option>
+           		       <option value="Snack"> Snack</option>
+		            </select>
+		    </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nombre-alimento">Nombre del Alimento:</label>
+                        <input type="text" id="nombre-alimento" placeholder="Ej: Pollo pechuga" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cantidad">Cantidad (g o unidad):</label>
+                        <input type="number" id="cantidad" placeholder="100" step="0.1">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="calorias">Calorías:</label>
+                            <input type="number" id="calorias" placeholder="0" step="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="proteina">Proteína (g):</label>
+                            <input type="number" id="proteina" placeholder="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="carbohidratos">Carbos (g):</label>
+                            <input type="number" id="carbohidratos" placeholder="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="grasas">Grasas (g):</label>
+                            <input type="number" id="grasas" placeholder="0" step="0.1">
+                        </div>
+                    </div>
+
+                    <button type="submit">Agregar Comida</button>
+                </form>
+
+                <div id="message" class="message"></div>
+            </aside>
+
+            <!-- Main: Comidas del día -->
+            <main class="main-content">
+                <h2> Comidas del Día</h2>
+
+                <div class="comidas-por-tipo">
+                    <div class="comida-grupo">
+                        <h3> Desayuno</h3>
+                        <div class="lista-comidas desayuno-list"></div>
+                        <p class="comida-empty">0 alimentos</p>
+                    </div>
+
+                    <div class="comida-grupo">
+                        <h3>️Almuerzo</h3>
+                        <div class="lista-comidas almuerzo-list"></div>
+                        <p class="comida-empty">0 alimentos</p>
+                    </div>
+
+                    <div class="comida-grupo">
+                        <h3> Cena</h3>
+                        <div class="lista-comidas cena-list"></div>
+                        <p class="comida-empty">0 alimentos</p>
+                    </div>
+
+                    <div class="comida-grupo">
+                        <h3> Snack</h3>
+                        <div class="lista-comidas snack-list"></div>
+                        <p class="comida-empty">0 alimentos</p>
+                    </div>
+                </div>
+
+                <!-- Totales -->
+                <section class="totales-dia">
+                    <h3> Totales del Día</h3>
+                    <div class="totales-grid">
+                        <div class="total-card">
+                            <p class="label">Calorías</p>
+                            <p class="valor" id="total-calorias">0 kcal</p>
+                        </div>
+                        <div class="total-card">
+                            <p class="label">Proteína</p>
+                            <p class="valor" id="total-proteina">0.0g</p>
+                        </div>
+                        <div class="total-card">
+                            <p class="label">Carbohidratos</p>
+                            <p class="valor" id="total-carbos">0.0g</p>
+                        </div>
+                        <div class="total-card">
+                            <p class="label">Grasas</p>
+                            <p class="valor" id="total-grasas">0.0g</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let chartNutricion = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Fecha hoy por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha-selector').value = hoy;
+
+            cargarRegistroDia(hoy);
+            cargarHistorico();
+        });
+
+        // Cambiar fecha
+        document.getElementById('fecha-selector').addEventListener('change', (e) => {
+            cargarRegistroDia(e.target.value);
+        });
+
+        // Agregar comida
+        document.getElementById('formComida').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const fecha = document.getElementById('fecha-selector').value;
+            const tipo = document.getElementById('tipo-comida').value;
+            const nombre = document.getElementById('nombre-alimento').value;
+            const cantidad = document.getElementById('cantidad').value;
+            const calorias = parseInt(document.getElementById('calorias').value);
+            const proteina = parseFloat(document.getElementById('proteina').value) || 0;
+            const carbohidratos = parseFloat(document.getElementById('carbohidratos').value) || 0;
+            const grasas = parseFloat(document.getElementById('grasas').value) || 0;
+
+            try {
+                const res = await fetch('/api/nutricion/comida', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        fecha, tipo, nombre, cantidad, calorias, proteina, carbohidratos, grasas
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    mostrarMensaje('✓ Comida agregada', 'success');
+                    document.getElementById('formComida').reset();
+                    document.getElementById('tipo-comida').value = '';
+                    cargarRegistroDia(fecha);
+                    cargarHistorico();
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error'), 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+        });
+
+        function cargarRegistroDia(fecha) {
+            const token = localStorage.getItem('token');
+
+            fetch(`/api/nutricion/dia?fecha=${fecha}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const tipos = ['Desayuno', 'Almuerzo', 'Cena', 'Snack'];
+
+                tipos.forEach(tipo => {
+                    const selector = `.${tipo.toLowerCase()}-list`;
+                    const contenedor = document.querySelector(selector);
+                    const comidas = data.comidasPorTipo[tipo] || [];
+
+                    if (comidas.length === 0) {
+                        contenedor.innerHTML = '<p style="color: #999; font-size: 0.9rem;">Sin alimentos</p>';
+                    } else {
+                        contenedor.innerHTML = comidas.map(c => `
+                            <div class="comida-item">
+                                <div class="comida-info">
+                                    <strong>${c.nombre}</strong>
+                                    ${c.cantidad ? `<span class="cantidad">${c.cantidad}g</span>` : ''}
+                                </div>
+                                <div class="comida-macros">
+                                    <span>${c.calorias} kcal</span>
+                                    <span>${c.proteina}g P</span>
+                                    <span>${c.carbohidratos}g C</span>
+                                    <span>${c.grasas}g G</span>
+                                </div>
+                                <button class="btn-delete" onclick="eliminarComida(${c.id})">✕</button>
+                            </div>
+                        `).join('');
+                    }
+                });
+
+                // Actualizar totales
+                document.getElementById('total-calorias').textContent = `${data.totales.calorias} kcal`;
+                document.getElementById('total-proteina').textContent = `${data.totales.proteina.toFixed(1)}g`;
+                document.getElementById('total-carbos').textContent = `${data.totales.carbohidratos.toFixed(1)}g`;
+                document.getElementById('total-grasas').textContent = `${data.totales.grasas.toFixed(1)}g`;
+            })
+            .catch(err => console.error(err));
+        }
+
+        function cargarHistorico() {
+            const token = localStorage.getItem('token');
+
+            fetch('/api/nutricion/historico', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const labels = data.historico.map(d => 
+                    new Date(d.fecha).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' })
+                );
+                const calorias = data.historico.map(d => d.calorias);
+
+                if (chartNutricion) chartNutricion.destroy();
+
+                const ctx = document.getElementById('grafica-nutricion').getContext('2d');
+                chartNutricion = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Calorías',
+                            data: calorias,
+                            borderColor: '#ff6b35',
+                            backgroundColor: 'rgba(255, 107, 53, 0.15)',
+                            tension: 0.3,
+                            fill: true,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#ff6b35'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: '#fff' } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#e0e0e0' } },
+                            y: { ticks: { color: '#e0e0e0' } }
+                        }
+                    }
+                });
+            })
+            .catch(err => console.error(err));
+        }
+
+        function eliminarComida(id) {
+            const token = localStorage.getItem('token');
+            const fecha = document.getElementById('fecha-selector').value;
+
+            fetch(`/api/nutricion/comida/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    cargarRegistroDia(fecha);
+                    cargarHistorico();
+                    mostrarMensaje('✓ Comida eliminada', 'success');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const msg = document.getElementById('message');
+            msg.textContent = texto;
+            msg.className = `message ${tipo}`;
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 4000);
+        }
+    </script>
 </body>
 </html>

@@ -3,11 +3,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrición - Fitness App</title>
+    <title>Fitness App</title>
+    <link rel="stylesheet" href="estilos/objetivos.css">
 </head>
 <body>
-    <h1>🥗 Nutrición</h1>
-    <p>Proximamente...</p>
-    <a href="/dashboard.html">← Volver al Dashboard</a>
+    <header>
+        <h1> Mis Objetivos</h1>
+        <div class="header-actions">
+            <a href="/dashboard.html">← Volver al Dashboard</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <!-- Sidebar: Crear objetivo -->
+            <aside class="sidebar">
+                <h3>Crear Nuevo Objetivo</h3>
+                <div id="message" class="message"></div>
+                <form id="objetivoForm">
+                    <div class="form-group">
+                        <label for="nombre_objetivo">Nombre del Objetivo:</label>
+                        <input type="text" id="nombre_objetivo" placeholder="Ej: Llegar a 100kg en press banca" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descripcion">Descripción:</label>
+                        <textarea id="descripcion" placeholder="Describe tu objetivo..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_inicio">Fecha de Inicio:</label>
+                        <input type="date" id="fecha_inicio" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha_fin">Fecha de Fin:</label>
+                        <input type="date" id="fecha_fin" required>
+                    </div>
+
+                    <button type="submit">Crear Objetivo</button>
+                </form>
+            </aside>
+
+            <!-- Main: Objetivos registrados -->
+            <main class="main-content">
+                <h2>Mis Objetivos Registrados</h2>
+                <div id="lista-objetivos">
+                    <p>Cargando objetivos...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            cargarObjetivos();
+        });
+
+        document.getElementById('objetivoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const nombre_objetivo = document.getElementById('nombre_objetivo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const fecha_inicio = document.getElementById('fecha_inicio').value;
+            const fecha_fin = document.getElementById('fecha_fin').value;
+
+            try {
+                const res = await fetch('/api/objetivos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        nombre_objetivo,
+                        descripcion,
+                        fecha_inicio,
+                        fecha_fin
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    mostrarMensaje('✓ Objetivo creado', 'success');
+                    document.getElementById('objetivoForm').reset();
+                    cargarObjetivos();
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error'), 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+        });
+
+        function cargarObjetivos() {
+            const token = localStorage.getItem('token');
+
+            fetch('/api/objetivos', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                const contenedor = document.getElementById('lista-objetivos');
+
+                if (!data.objetivos || data.objetivos.length === 0) {
+                    contenedor.innerHTML = '<p>Aún no tienes objetivos registrados</p>';
+                    return;
+                }
+
+                contenedor.innerHTML = '';
+                data.objetivos.forEach(obj => {
+                    const item = document.createElement('div');
+                    item.className = 'objetivo-item';
+                    item.innerHTML = `
+                        <div class="objetivo-header">
+                            <h4>${obj.nombre_objetivo}</h4>
+                            <span class="estado-badge ${obj.estado.toLowerCase().replace(' ', '-')}">${obj.estado}</span>
+                        </div>
+                        ${obj.descripcion ? `<p class="descripcion">${obj.descripcion}</p>` : ''}
+                        <div class="fechas">
+                            <span><strong>Inicio:</strong> ${new Date(obj.fecha_inicio).toLocaleDateString('es-ES')}</span>
+                            <span><strong>Fin:</strong> ${new Date(obj.fecha_fin).toLocaleDateString('es-ES')}</span>
+                        </div>
+                        <div class="progreso-section">
+                            <div class="progreso-bar">
+                                <div class="progreso-fill" style="width: ${obj.progreso}%"></div>
+                            </div>
+                            <p>${obj.progreso}% completado</p>
+                        </div>
+                        <div class="acciones">
+                            <input type="range" min="0" max="100" value="${obj.progreso}" 
+                                   class="progreso-slider" 
+                                   onchange="actualizarProgreso(${obj.id}, this.value)">
+                            <button class="btn-delete" onclick="eliminarObjetivo(${obj.id})">Eliminar</button>
+                        </div>
+                    `;
+                    contenedor.appendChild(item);
+                });
+            })
+            .catch(err => console.error(err));
+        }
+
+        function actualizarProgreso(id, progreso) {
+            const token = localStorage.getItem('token');
+
+            fetch(`/api/objetivos/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ progreso: parseInt(progreso) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    cargarObjetivos();
+                    mostrarMensaje('✓ Progreso actualizado', 'success');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function eliminarObjetivo(id) {
+            if (!confirm('¿Eliminar este objetivo?')) return;
+
+            const token = localStorage.getItem('token');
+
+            fetch(`/api/objetivos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    cargarObjetivos();
+                    mostrarMensaje('✓ Objetivo eliminado', 'success');
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = texto;
+            msgDiv.className = `message ${tipo}`;
+            msgDiv.style.display = 'block';
+
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 4000);
+        }
+    </script>
 </body>
 </html>

@@ -3,11 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrición - Fitness App</title>
+    <title>Fitness App</title>
+    <link rel="stylesheet" href="estilos/estadisticas.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>🥗 Nutrición</h1>
-    <p>Proximamente...</p>
-    <a href="/dashboard.html">← Volver al Dashboard</a>
+    <header>
+        <h1> Estadísticas</h1>
+        <div class="header-actions">
+            <a href="/dashboard.html">Volver</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="buscador-ejercicio">
+            <h2>Progresión de un ejercicio</h2>
+            <p>Escribe el nombre del ejercicio tal como lo guardas (ej: <strong>Press Banca</strong>).</p>
+            <form id="form-estadisticas">
+                <input type="text" id="nombre-ejercicio" placeholder="Ej: Press Banca" required>
+                <button type="submit">Buscar</button>
+            </form>
+            <div id="msg-estadisticas" class="message"></div>
+        </section>
+
+        <section class="grafica-section">
+            <h3 id="titulo-grafica">Gráfica de ejercicio</h3>
+            <canvas id="grafica-ejercicio"></canvas>
+        </section>
+    </div>
+
+    <script>
+        let chartEjercicio = null;
+
+        // Comprobar login
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+        });
+
+        document.getElementById('form-estadisticas').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre-ejercicio').value.trim();
+            const msgDiv = document.getElementById('msg-estadisticas');
+            const token = localStorage.getItem('token');
+
+            if (!nombre) return;
+
+            msgDiv.textContent = 'Buscando datos...';
+            msgDiv.className = 'message';
+            msgDiv.style.display = 'block';
+
+            try {
+                const res = await fetch(`/api/estadisticas/ejercicio?nombre=${encodeURIComponent(nombre)}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    msgDiv.textContent = data.error || 'Error al obtener estadísticas';
+                    msgDiv.className = 'message error';
+                    return;
+                }
+
+                if (!data.datos || data.datos.length === 0) {
+                    msgDiv.textContent = 'No hay registros para este ejercicio.';
+                    msgDiv.className = 'message error';
+                    actualizarGrafica(nombre, []); // limpia
+                    return;
+                }
+
+                msgDiv.textContent = 'Datos cargados correctamente.';
+                msgDiv.className = 'message success';
+
+                actualizarGrafica(nombre, data.datos);
+            } catch (err) {
+                console.error(err);
+                msgDiv.textContent = 'Error de conexión con el servidor';
+                msgDiv.className = 'message error';
+            }
+        });
+
+        function actualizarGrafica(nombre, datos) {
+            const ctx = document.getElementById('grafica-ejercicio').getContext('2d');
+            const titulo = document.getElementById('titulo-grafica');
+
+            if (!datos || datos.length === 0) {
+                titulo.textContent = 'Gráfica de ejercicio';
+                if (chartEjercicio) {
+                    chartEjercicio.destroy();
+                    chartEjercicio = null;
+                }
+                return;
+            }
+
+            // Etiquetas: 1, 2, 3, 4... por entrenamiento
+            const labels = datos.map((_, idx) => idx + 1);
+
+            // Peso medio y reps medias
+            const pesos = datos.map(d => d.pesoMedio);
+            const reps = datos.map(d => d.repsMedias);
+
+            titulo.textContent = `Progresión: ${nombre}`;
+
+            if (chartEjercicio) {
+                chartEjercicio.destroy();
+            }
+
+            chartEjercicio = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Peso (kg)',
+                            data: pesos,
+                            borderColor: '#ff6b35',
+                            backgroundColor: 'rgba(255, 107, 53, 0.2)',
+                            tension: 0.2,
+                            yAxisID: 'y-peso'
+                        },
+                        {
+                            label: 'Repeticiones',
+                            data: reps,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            tension: 0.2,
+                            yAxisID: 'y-reps'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ffffff'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => {
+                                    const idx = items[0].dataIndex;
+                                    const d = datos[idx];
+                                    // texto superior del tooltip: Día + nombre entrenamiento
+                                    return `${d.dia} - ${d.nombreEntrenamiento}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Entrenamientos (orden cronológico)',
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                color: '#e0e0e0'
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)'
+                            }
+                        },
+                        'y-peso': {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Peso (kg)',
+                                color: '#ff6b35'
+                            },
+                            ticks: {
+                                color: '#ff6b35',
+                                stepSize: 5 // escalado de 5 en 5 como comentabas
+                            },
+                            grid: {
+                                color: 'rgba(255,255,255,0.05)'
+                            }
+                        },
+                        'y-reps': {
+                            type: 'linear',
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Reps',
+                                color: '#3b82f6'
+                            },
+                            ticks: {
+                                color: '#3b82f6',
+                                stepSize: 1 // 1 en 1
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 </html>
+

@@ -3,11 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrición - Fitness App</title>
+    <title>Perfil - Fitness App</title>
+    <link rel="stylesheet" href="estilos/perfil.css">
 </head>
 <body>
-    <h1>🥗 Nutrición</h1>
-    <p>Proximamente...</p>
-    <a href="/dashboard.html">← Volver al Dashboard</a>
+    <header>
+        <h1>👤 Mi Perfil</h1>
+        <div class="header-actions">
+            <a href="/dashboard.html">← Volver al Dashboard</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="message" class="message"></div>
+
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-picture-wrapper">
+                    <img id="profile-pic" class="profile-picture" src="https://via.placeholder.com/150?text=Sin+Foto" alt="Foto de perfil">
+                    <button class="picture-upload-btn" onclick="document.getElementById('file-input').click()" type="button" title="Cambiar foto">📷</button>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
+                <div class="profile-info">
+                    <h2 id="display-username">-</h2>
+                    <p id="display-email">-</p>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('username-tab')" type="button">Cambiar Usuario</button>
+                <button class="tab-btn" onclick="switchTab('password-tab')" type="button">Cambiar Contraseña</button>
+            </div>
+
+            <div id="username-tab" class="tab-content active">
+                <div class="form-section">
+                    <h3>📝 Cambiar Nombre de Usuario</h3>
+                    <form id="usernameForm">
+                        <div class="form-group">
+                            <label for="new-username">Nuevo Nombre de Usuario:</label>
+                            <input type="text" id="new-username" placeholder="Nuevo usuario" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelarUsername()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="password-tab" class="tab-content">
+                <div class="form-section">
+                    <h3>🔐 Cambiar Contraseña</h3>
+                    <form id="passwordForm">
+                        <div class="form-group">
+                            <label for="current-password">Contraseña Actual:</label>
+                            <input type="password" id="current-password" placeholder="Tu contraseña actual" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">Nueva Contraseña:</label>
+                            <input type="password" id="new-password" placeholder="Nueva contraseña" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmar Nueva Contraseña:</label>
+                            <input type="password" id="confirm-password" placeholder="Confirma la nueva contraseña" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
+                            <button type="button" class="btn btn-secondary" onclick="cancelarPassword()">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let perfilCargado = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+            cargarPerfil();
+        });
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function cargarPerfil() {
+            const token = localStorage.getItem('token');
+            fetch('/api/perfil', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.usuario) {
+                    // Actualizar datos del usuario
+                    document.getElementById('display-username').textContent = data.usuario.username || 'Usuario';
+                    document.getElementById('display-email').textContent = data.usuario.email || 'sin-email@example.com';
+                    document.getElementById('new-username').value = data.usuario.username || '';
+                    
+                    // Actualizar foto si existe - añadir timestamp para evitar cache
+                    if (data.usuario.foto_perfil) {
+                        const imgElement = document.getElementById('profile-pic');
+                        const urlConTimestamp = data.usuario.foto_perfil + '?t=' + new Date().getTime();
+                        imgElement.src = urlConTimestamp;
+                        imgElement.onerror = () => {
+                            imgElement.src = 'https://via.placeholder.com/150?text=Sin+Foto';
+                            console.error('Error cargando imagen:', data.usuario.foto_perfil);
+                        };
+                    }
+                    
+                    perfilCargado = true;
+                }
+            })
+            .catch(err => {
+                console.error('Error cargando perfil:', err);
+                document.getElementById('display-username').textContent = 'Usuario';
+                document.getElementById('display-email').textContent = 'sin-email@example.com';
+            });
+        }
+
+        document.getElementById('file-input').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Validar que sea imagen
+            if (!file.type.startsWith('image/')) {
+                mostrarMensaje('✗ Solo se permiten archivos de imagen', 'error');
+                e.target.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('foto', file);
+            const token = localStorage.getItem('token');
+
+            try {
+                const res = await fetch('/api/perfil/foto', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+                
+                console.log('Respuesta servidor:', data);
+
+                if (res.ok) {
+                    mostrarMensaje('✓ Foto de perfil actualizada', 'success');
+                    
+                    // Usar la URL devuelta, añadiendo timestamp para evitar cache
+                    if (data.foto_url) {
+                        const urlConTimestamp = data.foto_url + '?t=' + new Date().getTime();
+                        document.getElementById('profile-pic').src = urlConTimestamp;
+                    } else {
+                        // Si no devuelve URL, recargar el perfil después de 1 segundo
+                        setTimeout(cargarPerfil, 1000);
+                    }
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error al actualizar foto'), 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+            
+            // Limpiar el input para permitir subir la misma foto nuevamente
+            e.target.value = '';
+        });
+
+        document.getElementById('usernameForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const newUsername = document.getElementById('new-username').value.trim();
+
+            if (newUsername.length < 3) {
+                mostrarMensaje('✗ El usuario debe tener al menos 3 caracteres', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/perfil/username', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ username: newUsername })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    mostrarMensaje('✓ Nombre de usuario actualizado', 'success');
+                    document.getElementById('display-username').textContent = newUsername;
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error'), 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                mostrarMensaje('✗ Las contraseñas no coinciden', 'error');
+                return;
+            }
+            if (newPassword.length < 6) {
+                mostrarMensaje('✗ La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/perfil/password', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        passwordActual: currentPassword,
+                        passwordNueva: newPassword
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    mostrarMensaje('✓ Contraseña actualizada', 'success');
+                    document.getElementById('passwordForm').reset();
+                } else {
+                    mostrarMensaje('✗ ' + (data.error || 'Error'), 'error');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                mostrarMensaje('✗ Error de conexión', 'error');
+            }
+        });
+
+        function cancelarUsername() {
+            if (perfilCargado) {
+                cargarPerfil();
+            }
+        }
+
+        function cancelarPassword() {
+            document.getElementById('passwordForm').reset();
+        }
+
+        function mostrarMensaje(texto, tipo) {
+            const msg = document.getElementById('message');
+            msg.textContent = texto;
+            msg.className = `message ${tipo}`;
+            msg.style.display = 'block';
+            setTimeout(() => { msg.style.display = 'none'; }, 4000);
+        }
+    </script>
 </body>
 </html>
